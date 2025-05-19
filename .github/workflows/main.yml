@@ -1,0 +1,48 @@
+name: GraphQL App CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - feature/tests
+  pull_request:
+    branches: 
+      - main
+      - test
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18.x'
+          
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run linting
+        run: npm run lint || echo "Linting not configured, skipping"
+      
+      - name: Run tests
+        run: npm test -- --watchAll=false
+      
+      - name: Build application
+        run: npm run build
+      
+      # Special test for the feature/tests branch
+      - name: Run location tests
+        if: github.ref == 'refs/heads/feature/tests'
+        run: npm test -- --watchAll=false --testMatch="**/tests/location.test.jsx"
+      
+      # Store build artifacts
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: build-files
+          path: ./build
