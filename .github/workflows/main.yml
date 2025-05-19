@@ -16,12 +16,13 @@ jobs:
     
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: '18.x'
+          cache: 'npm'
           
       - name: Install dependencies
         run: npm ci
@@ -33,16 +34,24 @@ jobs:
         run: npm test -- --watchAll=false
       
       - name: Build application
-        run: npm run build
+        id: build
+        run: |
+          npm run build
+          echo "success=true" >> $GITHUB_OUTPUT
+          
+      - name: Debug build directory
+        run: ls -la ./build || echo "Build directory not found"
       
       # Special test for the feature/tests branch
       - name: Run location tests
         if: github.ref == 'refs/heads/feature/tests'
-        run: npm test -- --watchAll=false --testMatch="**/tests/location.test.jsx"
+        run: npm run test:location -- --watchAll=false
       
-      # Store build artifacts
+      # Store build artifacts only if build succeeded
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v2
+        if: steps.build.outputs.success == 'true'
+        uses: actions/upload-artifact@v3
         with:
           name: build-files
           path: ./build
+          if-no-files-found: warn
