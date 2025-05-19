@@ -28,4 +28,4 @@ jobs:
       
       - name: Run location tests
         if: github.ref == 'refs/heads/feature/tests'
-        run: npm test -- --testMatch="**/tests/location.test.jsx" --watchAll=false
+        run: npm test -- --testMatch="**/src/tests/location.test.jsx" --watchAll=false
