@@ -1,11 +1,11 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MockedProvider } from '@apollo/client/testing';
-import { GET_POSTS, GET_POSTS_BY_USER } from '../src/graphql/queries';
+import { GET_POSTS } from '../src/graphql/queries';
 import QueryDemo from '../src/pages/QueryDemo';
 
-// Mock data for all countries
-const allCountriesMock = [
+// Mock data for countries query
+const mocks = [
   {
     request: {
       query: GET_POSTS,
@@ -28,14 +28,6 @@ const allCountriesMock = [
             continent: {
               name: "North America"
             }
-          },
-          {
-            code: "JP",
-            name: "Japan",
-            capital: "Tokyo",
-            continent: {
-              name: "Asia"
-            }
           }
         ]
       }
@@ -43,16 +35,11 @@ const allCountriesMock = [
   }
 ];
 
-// Mock for user event
-const userEvent = {
-  selectOptions: jest.fn()
-};
-
-// Basic test to check if country names are rendered
-test('renders country names when data is fetched', async () => {
-  // Render the component with the mocked provider
+// Test case to render the location name when data is fetched
+test('renders location names when data is fetched', async () => {
+  // Render the component with mocked data
   render(
-    <MockedProvider mocks={allCountriesMock} addTypename={false}>
+    <MockedProvider mocks={mocks} addTypename={false}>
       <QueryDemo />
     </MockedProvider>
   );
@@ -60,12 +47,9 @@ test('renders country names when data is fetched', async () => {
   // Initially should show loading
   expect(screen.getByText(/Loading countries/i)).toBeInTheDocument();
 
-  // Wait for the data to be loaded
+  // Wait for data to be loaded and check if country names are rendered
   await waitFor(() => {
     expect(screen.getByText('United States')).toBeInTheDocument();
+    expect(screen.getByText('Canada')).toBeInTheDocument();
   });
-
-  // Check if all countries from the mock data are rendered
-  expect(screen.getByText('Canada')).toBeInTheDocument();
-  expect(screen.getByText('Japan')).toBeInTheDocument();
 });

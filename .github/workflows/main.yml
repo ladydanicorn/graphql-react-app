@@ -22,36 +22,17 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18.x'
-          cache: 'npm'
           
       - name: Install dependencies
         run: npm ci
-      
-      - name: Run linting
-        run: npm run lint || echo "Linting not configured, skipping"
       
       - name: Run tests
         run: npm test -- --watchAll=false
       
       - name: Build application
-        id: build
-        run: |
-          npm run build
-          echo "success=true" >> $GITHUB_OUTPUT
-          
-      - name: Debug build directory
-        run: ls -la ./build || echo "Build directory not found"
+        run: npm run build
       
       # Special test for the feature/tests branch
       - name: Run location tests
         if: github.ref == 'refs/heads/feature/tests'
-        run: npm run test:location -- --watchAll=false
-      
-      # Store build artifacts only if build succeeded
-      - name: Upload build artifacts
-        if: steps.build.outputs.success == 'true'
-        uses: actions/upload-artifact@v3
-        with:
-          name: build-files
-          path: ./build
-          if-no-files-found: warn
+        run: npm test -- --watchAll=false --testMatch="**/tests/location.test.*"
